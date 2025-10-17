@@ -12,24 +12,56 @@ public class Main {
     public static void main(String[] args) {
 
         // Ventana principal
-        JFrame principal = new JFrame("Editor de texto con estilos");
+        JFrame principal = new JFrame("Editor de texto");
         principal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         principal.setLocationRelativeTo(null);
-        principal.setSize(600, 400);
+        principal.setSize(700, 450);
         principal.setLayout(new BorderLayout());
 
+        // Barra de herramientas
+        JPanel barraSuperior = new JPanel(new BorderLayout());
+        barraSuperior.setBackground(Color.WHITE);
+
+        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        panelBoton.setBackground(Color.WHITE);
+
+        JButton btnMayus = crearBoton("A");
+        panelBoton.add(btnMayus);
+        JButton btnMinus = crearBoton("a");
+        panelBoton.add(btnMinus);
+
+        JToggleButton btnNegrita = crearBotonToggle("B", Font.BOLD);
+        panelBoton.add(btnNegrita);
+
+        JToggleButton btnCursiva = crearBotonToggle("I", Font.ITALIC);
+        panelBoton.add(btnCursiva);
+
+        // botón de búsqueda
+        JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        panelDerecha.setBackground(Color.WHITE);
+        JButton btnBuscar = crearBoton("?");
+        panelDerecha.add(btnBuscar);
+
+        barraSuperior.add(panelBoton, BorderLayout.WEST);
+        barraSuperior.add(panelDerecha, BorderLayout.EAST);
+
+
+        principal.add(barraSuperior, BorderLayout.NORTH);
 
         JPanel area = new JPanel(new BorderLayout());
-        // Área de texto con soporte para estilos
         JTextPane textPane = new JTextPane();
+        textPane.setFont(new Font("Calibri", Font.PLAIN, 15));
         textPane.setMargin(new Insets(10, 10, 10, 10));
         JScrollPane scroll = new JScrollPane(textPane,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         area.add(scroll, BorderLayout.CENTER);
-        // Contador dinámico
+
+        //Contador dinámico
         JLabel cont = new JLabel("Líneas: 0 | Palabras: 0");
+        cont.setFont(new Font("Calibri", Font.PLAIN, 13));
+        cont.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         textPane.getDocument().addDocumentListener(new DocumentListener() {
             public void actualizar() {
                 String texto = textPane.getText();
@@ -41,28 +73,9 @@ public class Main {
             @Override public void removeUpdate(DocumentEvent e) { actualizar(); }
             @Override public void changedUpdate(DocumentEvent e) { actualizar(); }
         });
-        area.add(cont, BorderLayout.NORTH);
+        area.add(cont, BorderLayout.SOUTH);
 
         principal.add(area, BorderLayout.CENTER);
-
-        // Panel de botones
-        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton btnMayus = crearBoton("Mayus");
-        panelBoton.add(btnMayus);
-        JButton btnMinus = crearBoton("Minus");
-        panelBoton.add(btnMinus);
-        JButton btnNegrita = crearBoton("Bold");
-        btnNegrita.setFont(new Font("Arial", Font.BOLD, 15));
-        panelBoton.add(btnNegrita);
-        JButton btnCursiva = crearBoton("Italic");
-        btnCursiva.setFont(new Font("Arial", Font.ITALIC, 15));
-        panelBoton.add(btnCursiva);
-        JButton btnNormal = crearBoton("Normal");
-        panelBoton.add(btnNormal);
-        JButton btnBuscar = crearBoton("Buscar");
-        panelBoton.add(btnBuscar);
-
-        principal.add(panelBoton, BorderLayout.SOUTH);
 
         // Acciones de transformación de texto
         btnMayus.addActionListener(e -> transformarSeleccion(textPane, true));
@@ -85,15 +98,17 @@ public class Main {
         });
 
         // Acciones de estilo
-        btnNegrita.addActionListener(e -> aplicarEstilo(textPane, Font.BOLD));
-        btnCursiva.addActionListener(e -> aplicarEstilo(textPane, Font.ITALIC));
-        btnNormal.addActionListener(e -> aplicarEstilo(textPane, Font.PLAIN));
+        btnNegrita.addActionListener(e ->
+                aplicarEstilo(textPane, Font.BOLD, btnNegrita.isSelected()));
+        btnCursiva.addActionListener(e ->
+                aplicarEstilo(textPane, Font.ITALIC, btnCursiva.isSelected()));
 
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control B"), "negrita");
         textPane.getActionMap().put("negrita", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 aplicarEstilo(textPane, Font.BOLD);
+                btnNegrita.setSelected(!btnNegrita.isSelected());
             }
         });
 
@@ -102,14 +117,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 aplicarEstilo(textPane, Font.ITALIC);
-            }
-        });
-
-        textPane.getInputMap().put(KeyStroke.getKeyStroke("control P"), "normal");
-        textPane.getActionMap().put("normal", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                aplicarEstilo(textPane, Font.PLAIN);
+                btnCursiva.setSelected(!btnCursiva.isSelected());
             }
         });
 
@@ -149,7 +157,7 @@ public class Main {
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control X"), "cortar");
         textPane.getActionMap().put("cortar", new DefaultEditorKit.CutAction());
 
-        //Menu contextual por click izquierdo para cortar, copiar y pegar
+        //Menu contextual por click derecho para cortar, copiar y pegar
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem cortar = new JMenuItem("Cortar   ctrl+x");
         JMenuItem copiar = new JMenuItem("Copiar   ctrl+c");
@@ -179,17 +187,42 @@ public class Main {
 
     public static JButton crearBoton(String nombre) {
         JButton btn = new JButton(nombre);
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(Color.BLACK);
-        btn.setFont(new Font("Arial", Font.BOLD, 14));
+        btn.setFocusPainted(false);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setFont(new Font("Calibri", Font.PLAIN, 15));
         return btn;
     }
+    public static JToggleButton crearBotonToggle(String texto, int estilo) {
+        JToggleButton btn = new JToggleButton(texto);
+        btn.setFont(new Font("Calibri", estilo, 15));
+        btn.setFocusPainted(false);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(40, 32));
+
+        btn.addChangeListener(e -> {
+            if (btn.isSelected()) {
+                btn.setBackground(new Color(0, 120, 215));
+                btn.setForeground(Color.BLACK);
+            } else {
+                btn.setBackground(Color.WHITE);
+                btn.setForeground(Color.BLACK);
+            }
+        });
+
+        return btn;
+    }
+
 
     public static void transformarSeleccion(JTextPane textPane, boolean aMayusculas) {
         String seleccionado = textPane.getSelectedText();
         if (seleccionado != null && !seleccionado.isEmpty()) {
             int start = textPane.getSelectionStart();
-            int end = textPane.getSelectionEnd();
             String reemplazo = aMayusculas ? seleccionado.toUpperCase() : seleccionado.toLowerCase();
             textPane.replaceSelection(reemplazo);
             textPane.select(start, start + reemplazo.length());
@@ -199,29 +232,26 @@ public class Main {
         }
     }
 
-    public static void aplicarEstilo(JTextPane textPane, int estilo) {
+    public static void aplicarEstilo(JTextPane textPane, int estilo, boolean activar) {
         int start = textPane.getSelectionStart();
         int end = textPane.getSelectionEnd();
         StyledDocument doc = textPane.getStyledDocument();
-        MutableAttributeSet attr = new SimpleAttributeSet();
+        MutableAttributeSet attrs = new SimpleAttributeSet();
 
-        // Configurar atributos según el estilo
-        if (estilo == Font.BOLD) {
-            StyleConstants.setBold(attr, true);
-        } else if (estilo == Font.ITALIC) {
-            StyleConstants.setItalic(attr, true);
-        } else if (estilo == Font.PLAIN) {
-            StyleConstants.setBold(attr, false);
-            StyleConstants.setItalic(attr, false);
-        }
+        if (estilo == Font.BOLD)
+            StyleConstants.setBold(attrs, activar);
+        else if (estilo == Font.ITALIC)
+            StyleConstants.setItalic(attrs, activar);
 
-        // Si no hay selección, aplicar a todo el texto
         if (start == end) {
-            start = 0;
-            end = doc.getLength();
+            doc.setCharacterAttributes(0, doc.getLength(), attrs, false);
+        } else {
+            doc.setCharacterAttributes(start, end - start, attrs, false);
         }
+    }
 
-        doc.setCharacterAttributes(start, end - start, attr, false);
+    public static void aplicarEstilo(JTextPane textPane, int estilo) {
+        aplicarEstilo(textPane, estilo, true);
     }
 
     public static void buscarRemplazar(JFrame frame, JTextPane textPane) {
@@ -232,8 +262,9 @@ public class Main {
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null, opciones, opciones[0]);
+
         if (seleccion == 0) {
-            String buscar = JOptionPane.showInputDialog(frame, "Palabra que buscar: ");
+            String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
             if (buscar != null && !buscar.isEmpty()) {
                 String text = textPane.getText();
                 if (text.contains(buscar)) {
@@ -243,7 +274,7 @@ public class Main {
                 }
             }
         } else if (seleccion == 1) {
-            String buscar = JOptionPane.showInputDialog(frame, "Palabra a buscar: ");
+            String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
             String reemplazar = JOptionPane.showInputDialog(frame, "Reemplazar por: ");
             if (buscar != null && reemplazar != null) {
                 String text = textPane.getText();
