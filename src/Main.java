@@ -62,8 +62,8 @@ public class Main {
         JLabel cont = new JLabel("Líneas: 0 | Palabras: 0");
         cont.setFont(new Font("Calibri", Font.PLAIN, 13));
         cont.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        textPane.getDocument().addDocumentListener(new DocumentListener() {
-            public void actualizar() {
+        textPane.getDocument().addDocumentListener(new DocumentListener() {//El DocumentLstener es un oyente que se activa cada vez que el texto cambia
+            public void actualizar() {//Calculo de lineas y palabras
                 String texto = textPane.getText();
                 int lineas = texto.split("\n").length;
                 int palabras = texto.trim().isEmpty() ? 0 : texto.trim().split("\\s+").length;
@@ -107,8 +107,9 @@ public class Main {
         textPane.getActionMap().put("negrita", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                aplicarEstilo(textPane, Font.BOLD);
+
                 btnNegrita.setSelected(!btnNegrita.isSelected());
+                aplicarEstilo(textPane, Font.BOLD, btnNegrita.isSelected());
             }
         });
 
@@ -116,8 +117,9 @@ public class Main {
         textPane.getActionMap().put("cursiva", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                aplicarEstilo(textPane, Font.ITALIC);
+
                 btnCursiva.setSelected(!btnCursiva.isSelected());
+                aplicarEstilo(textPane, Font.ITALIC, btnCursiva.isSelected());
             }
         });
 
@@ -134,7 +136,7 @@ public class Main {
         });
 
         UndoManager undoManager = new UndoManager();
-        textPane.getDocument().addUndoableEditListener(undoManager);
+        textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto
 
         // Ctrl + Z
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control Z"), "deshacer");
@@ -217,7 +219,6 @@ public class Main {
 
         return btn;
     }
-
 
     public static void transformarSeleccion(JTextPane textPane, boolean aMayusculas) {
         String seleccionado = textPane.getSelectedText();
