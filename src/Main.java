@@ -26,20 +26,26 @@ public class Main {
         panelBoton.setBackground(Color.WHITE);
 
         JButton btnMayus = crearBoton("A");
+        btnMayus.setToolTipText("Mayúsculas (Ctrl+M)");
         panelBoton.add(btnMayus);
         JButton btnMinus = crearBoton("a");
+        btnMinus.setToolTipText("Minúsculas (Ctrl+N)");
         panelBoton.add(btnMinus);
 
         JToggleButton btnNegrita = crearBotonToggle("B", Font.BOLD);
+        btnNegrita.setToolTipText("Negrita (Ctrl+B)");
         panelBoton.add(btnNegrita);
 
         JToggleButton btnCursiva = crearBotonToggle("I", Font.ITALIC);
+        btnCursiva.setToolTipText("Cursiva (Ctrl+I)");
         panelBoton.add(btnCursiva);
 
         // botón de búsqueda
         JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panelDerecha.setBackground(Color.WHITE);
+
         JButton btnBuscar = crearBoton("?");
+        btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
         panelDerecha.add(btnBuscar);
 
         barraSuperior.add(panelBoton, BorderLayout.WEST);
@@ -245,15 +251,13 @@ public class Main {
             StyleConstants.setItalic(attrs, activar);
 
         if (start == end) {
-            doc.setCharacterAttributes(0, doc.getLength(), attrs, false);
+
+            textPane.setCharacterAttributes(attrs, false);
         } else {
             doc.setCharacterAttributes(start, end - start, attrs, false);
         }
     }
 
-    public static void aplicarEstilo(JTextPane textPane, int estilo) {
-        aplicarEstilo(textPane, estilo, true);
-    }
 
     public static void buscarRemplazar(JFrame frame, JTextPane textPane) {
         String[] opciones = {"Solo Buscar", "Buscar y Reemplazar"};
