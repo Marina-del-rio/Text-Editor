@@ -4,6 +4,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
 
 public class EditorController {
 
@@ -162,4 +164,27 @@ public class EditorController {
             }
         }
     }
+
+    //Menu abrir
+    public static void abrirArchivo(JFrame frame, JTextPane textPane) {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Abrir archivo");
+
+        int seleccion = fc.showOpenDialog(frame);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            java.io.File archivo = fc.getSelectedFile();
+
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
+                StringBuilder contenido = new StringBuilder();
+                String linea;
+                while ((linea = reader.readLine()) != null) {
+                    contenido.append(linea).append("\n");
+                }
+                textPane.setText(contenido.toString());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error al abrir el archivo: " + ex.getMessage());
+            }
+        }
+    }
+
 }

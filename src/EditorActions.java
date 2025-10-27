@@ -93,5 +93,14 @@ public class EditorActions {
                 EditorController.guardarArchivo(principal, textPane);
             }
         });
+
+        // Ctrl + O
+        textPane.getInputMap().put(KeyStroke.getKeyStroke("control O"), "abrir");
+        textPane.getActionMap().put("abrir", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EditorController.abrirArchivo(principal, textPane);
+            }
+        });
     }
 }
