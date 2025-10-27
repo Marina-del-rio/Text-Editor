@@ -141,4 +141,25 @@ public class EditorController {
             }
         });
     }
+
+    //Menu guardar
+    public static void guardarArchivo(JFrame frame, JTextPane textPane) {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Guardar archivo");
+
+        int seleccion = fc.showSaveDialog(frame);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            java.io.File archivo = fc.getSelectedFile();
+            if (!archivo.getName().toLowerCase().endsWith(".txt")) {
+                archivo = new java.io.File(archivo.getAbsolutePath() + ".txt");
+            }
+
+            try (java.io.FileWriter writer = new java.io.FileWriter(archivo)) {
+                writer.write(textPane.getText());
+                JOptionPane.showMessageDialog(frame, "Archivo guardado correctamente.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error al guardar el archivo: " + ex.getMessage());
+            }
+        }
+    }
 }

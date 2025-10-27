@@ -37,9 +37,14 @@ public class EditorFrame extends JFrame {
         btnCursiva.setToolTipText("Cursiva (Ctrl+I)");
         panelBoton.add(btnCursiva);
 
-        // botón de búsqueda
+        // botón de búsqueda y guardar
         JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panelDerecha.setBackground(Color.WHITE);
+
+        JButton btnGuardar = EditorController.crearBoton("Save");
+        btnGuardar.setToolTipText("Guardar archivo (Ctrl+S)");
+        panelDerecha.add(btnGuardar);
+
 
         JButton btnBuscar = EditorController.crearBoton("?");
         btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
@@ -83,6 +88,9 @@ public class EditorFrame extends JFrame {
         btnBuscar.addActionListener(e -> {
             EditorController.buscarRemplazar(principal, textPane);
         });
+
+        //Guardar
+        btnGuardar.addActionListener(e -> EditorController.guardarArchivo(principal, textPane));
 
         UndoManager undoManager = new UndoManager();
         textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto

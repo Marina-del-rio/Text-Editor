@@ -84,5 +84,14 @@ public class EditorActions {
         // Ctrl + X
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control X"), "cortar");
         textPane.getActionMap().put("cortar", new DefaultEditorKit.CutAction());
+
+        // Ctrl + S
+        textPane.getInputMap().put(KeyStroke.getKeyStroke("control S"), "guardar");
+        textPane.getActionMap().put("guardar", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                EditorController.guardarArchivo(principal, textPane);
+            }
+        });
     }
 }
