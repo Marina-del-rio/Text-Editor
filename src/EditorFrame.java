@@ -41,15 +41,15 @@ public class EditorFrame extends JFrame {
         JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panelDerecha.setBackground(Color.WHITE);
 
-        JButton btnGuardar = EditorController.crearBoton("Save");
+        JButton btnGuardar = EditorController.crearBotonEmoji("💾");
         btnGuardar.setToolTipText("Guardar archivo (Ctrl+S)");
         panelDerecha.add(btnGuardar);
 
-        JButton btnAbrir = EditorController.crearBoton("Open");
+        JButton btnAbrir = EditorController.crearBotonEmoji("📂");
         btnAbrir.setToolTipText("Abrir archivo (Ctrl+O)");
         panelDerecha.add(btnAbrir);
 
-        JButton btnBuscar = EditorController.crearBoton("?");
+        JButton btnBuscar = EditorController.crearBotonEmoji("🔍");
         btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
         panelDerecha.add(btnBuscar);
 

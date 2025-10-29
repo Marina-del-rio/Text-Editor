@@ -4,8 +4,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.File;
 
 public class EditorController {
 
@@ -17,6 +15,17 @@ public class EditorController {
         btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFont(new Font("Calibri", Font.PLAIN, 15));
+        return btn;
+    }
+
+    public static JButton crearBotonEmoji(String emoji) {
+        JButton btn = new JButton(emoji);
+        btn.setFocusPainted(false);
+        btn.setBackground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
+        btn.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         return btn;
     }
 
