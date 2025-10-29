@@ -98,6 +98,66 @@ public class EditorController {
         };
     }
 
+    //Buscar
+    public static int buscarTexto(JTextPane textPane, String buscar) {
+        Highlighter highlighter = textPane.getHighlighter();
+        highlighter.removeAllHighlights();
+
+        if (buscar == null || buscar.isEmpty()) {
+            return 0; // No hacer nada si la búsqueda está vacía
+        }
+
+        StyledDocument doc = textPane.getStyledDocument();
+        int contador = 0;
+        int primerResultado = -1; // Guardaremos la posición del primer resultado
+
+        try {
+            // Obtenemos el texto directamente del Document para asegurar que los índices coincidan
+            String textoCompleto = doc.getText(0, doc.getLength());
+            String textoBusquedaLower = buscar.toLowerCase();
+            String textoCompletoLower = textoCompleto.toLowerCase();
+
+            int index = 0;
+            while ((index = textoCompletoLower.indexOf(textoBusquedaLower, index)) != -1) {
+                int end = index + textoBusquedaLower.length();
+
+                // Usamos los índices calculados en el texto del Document para resaltar
+                highlighter.addHighlight(index, end,
+                        new DefaultHighlighter.DefaultHighlightPainter(
+                                new Color(173, 216, 230, 150) // azul clarito translúcido
+                        ));
+
+                if (primerResultado == -1) {
+                    primerResultado = index; // Guardamos la posición del primer match
+                }
+
+                contador++;
+                index = end; // Continuamos la búsqueda desde el final de la coincidencia actual
+            }
+
+            if (contador > 0) {
+                // Movemos el cursor al inicio de la primera coincidencia encontrada
+                textPane.setCaretPosition(primerResultado);
+                textPane.requestFocus();
+            }
+
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+
+        return contador;
+    }
+    //Reemplazar
+    public static void reemplazarTexto(JTextPane textPane, String buscar, String reemplazar) {
+        // Reemplazo ignorando mayúsculas/minúsculas
+        String nuevoTexto = textPane.getText().replaceAll("(?i)" + java.util.regex.Pattern.quote(buscar), reemplazar);
+        textPane.setText(nuevoTexto);
+
+        // Limpiar resaltados después de reemplazar
+        textPane.getHighlighter().removeAllHighlights();
+    }
+
+    //buscarRemplazar en JOption
     public static void buscarRemplazar(JFrame frame, JTextPane textPane) {
         String[] opciones = {"Solo Buscar", "Buscar y Reemplazar"};
         int seleccion = JOptionPane.showOptionDialog(frame,
@@ -107,26 +167,42 @@ public class EditorController {
                 JOptionPane.QUESTION_MESSAGE,
                 null, opciones, opciones[0]);
 
-        if (seleccion == 0) {
-            String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
-            if (buscar != null && !buscar.isEmpty()) {
-                String text = textPane.getText();
-                if (text.contains(buscar)) {
-                    JOptionPane.showMessageDialog(frame, "Palabra encontrada");
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Palabra no encontrada");
-                }
-            }
-        } else if (seleccion == 1) {
-            String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
-            String reemplazar = JOptionPane.showInputDialog(frame, "Reemplazar por: ");
-            if (buscar != null && reemplazar != null) {
-                String text = textPane.getText();
-                text = text.replace(buscar, reemplazar);
-                textPane.setText(text);
-            }
+        if (seleccion == JOptionPane.CLOSED_OPTION) return;
+
+        String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
+        if (buscar == null || buscar.isEmpty()) return;
+
+        int encontrados = buscarTexto(textPane, buscar);
+
+        if (encontrados == 0) {
+            JOptionPane.showMessageDialog(frame, "No se encontraron coincidencias.");
+            return;
         }
+
+        if (seleccion == 1) { // Reemplazar
+            String reemplazar = JOptionPane.showInputDialog(frame, "Reemplazar por: ");
+            if (reemplazar != null) {
+                reemplazarTexto(textPane, buscar, reemplazar);
+                JOptionPane.showMessageDialog(frame, "Reemplazo completado.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(frame, "Se encontraron " + encontrados + " coincidencias resaltadas.");
+        }
+
+        // Limpiar resaltado al interactuar con el textPane
+        Highlighter highlighter = textPane.getHighlighter();
+        textPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) { highlighter.removeAllHighlights(); }
+        });
+        textPane.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) { highlighter.removeAllHighlights(); }
+            @Override
+            public void keyPressed(KeyEvent e) { highlighter.removeAllHighlights(); }
+        });
     }
+
 
     public static void configurarMenuContextual(JTextPane textPane) {
         //Menu contextual por click derecho para cortar, copiar y pegar
