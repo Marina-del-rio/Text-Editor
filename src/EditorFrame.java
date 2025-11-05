@@ -53,6 +53,11 @@ public class EditorFrame extends JFrame {
         btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
         panelDerecha.add(btnBuscar);
 
+        JToggleButton btnModoOsc = EditorController.crearBotonToggle("🌔", Font.PLAIN);
+        btnModoOsc.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
+        btnModoOsc.setToolTipText("Modo Oscuro");
+        panelDerecha.add(btnModoOsc);
+
         barraSuperior.add(panelBoton, BorderLayout.WEST);
         barraSuperior.add(panelDerecha, BorderLayout.EAST);
 
@@ -93,10 +98,20 @@ public class EditorFrame extends JFrame {
         });
 
         //Guardar
-        btnGuardar.addActionListener(e -> EditorController.guardarArchivo(principal, textPane));
+        btnGuardar.addActionListener(e ->
+                EditorController.guardarArchivo(principal, textPane));
 
         //Abrir
-        btnAbrir.addActionListener(e -> EditorController.abrirArchivo(principal, textPane));
+        btnAbrir.addActionListener(e ->
+                EditorController.abrirArchivo(principal, textPane));
+
+
+        //ModoOscuro
+        btnModoOsc.addActionListener(e -> {
+            EditorController.modoOscuro(principal, textPane);
+
+            btnModoOsc.setText(EditorController.esModoOscuro ? "🌕" : "🌔");
+        });
 
         UndoManager undoManager = new UndoManager();
         textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto

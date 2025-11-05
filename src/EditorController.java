@@ -1,9 +1,12 @@
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Enumeration;
 
 public class EditorController {
 
@@ -205,11 +208,11 @@ public class EditorController {
 
 
     public static void configurarMenuContextual(JTextPane textPane) {
-        //Menu contextual por click derecho para cortar, copiar y pegar
+
         JPopupMenu popupMenu = new JPopupMenu();
-        JMenuItem cortar = new JMenuItem("Cortar   ctrl+x");
-        JMenuItem copiar = new JMenuItem("Copiar   ctrl+c");
-        JMenuItem pegar = new JMenuItem("Pegar     ctrl+v");
+        JMenuItem cortar = new JMenuItem("Cortar   Ctrl+X");
+        JMenuItem copiar = new JMenuItem("Copiar   Ctrl+C");
+        JMenuItem pegar = new JMenuItem("Pegar    Ctrl+V");
 
         cortar.addActionListener(new DefaultEditorKit.CutAction());
         copiar.addActionListener(new DefaultEditorKit.CopyAction());
@@ -219,13 +222,32 @@ public class EditorController {
         popupMenu.add(copiar);
         popupMenu.add(pegar);
 
-        textPane.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger() || SwingUtilities.isRightMouseButton(e)) {
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+        // Mostrar el menú contextual
+        textPane.setComponentPopupMenu(popupMenu);
+
+        // Aplicar modo oscuro cuando se abre el popup
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+
+                boolean oscuro = esModoOscuro; // usa tu misma variable global
+
+                Color fondo = oscuro ? new Color(45,45,45) : Color.WHITE;
+                Color texto = oscuro ? Color.WHITE : Color.BLACK;
+                Color borde = oscuro ? Color.GRAY : Color.LIGHT_GRAY;
+
+                popupMenu.setBackground(fondo);
+                popupMenu.setBorder(BorderFactory.createLineBorder(borde, 1));
+
+                for (Component item : popupMenu.getComponents()) {
+                    item.setBackground(fondo);
+                    item.setForeground(texto);
+                    if (item instanceof JMenuItem) {
+                        ((JMenuItem) item).setOpaque(true);
+                    }
                 }
             }
+            @Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+            @Override public void popupMenuCanceled(PopupMenuEvent e) {}
         });
     }
 
@@ -269,6 +291,80 @@ public class EditorController {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Error al abrir el archivo: " + ex.getMessage());
             }
+        }
+    }
+
+    public static boolean esModoOscuro = false;
+
+    public static void modoOscuro(JFrame frame, JTextPane textPane) {
+        esModoOscuro = !esModoOscuro; // alternar modo
+
+        // Colores principales
+        Color fondoVentana = esModoOscuro ? new Color(35, 35, 35) : Color.WHITE;
+        Color fondoEditor = esModoOscuro ? new Color(28, 28, 28) : Color.WHITE;
+        Color texto = esModoOscuro ? Color.WHITE : Color.BLACK;
+        Color botones = esModoOscuro ? new Color(50, 50, 50) : Color.WHITE;
+
+        // Ventana
+        frame.getContentPane().setBackground(fondoVentana);
+
+        // JTextPane
+        textPane.setBackground(fondoEditor);
+        textPane.setForeground(texto);
+        textPane.setCaretColor(texto);
+        textPane.putClientProperty("defaultFont", textPane.getFont()); // evita restauraciones de color
+
+        StyledDocument doc = textPane.getStyledDocument();
+        MutableAttributeSet attr = new SimpleAttributeSet();
+        StyleConstants.setForeground(attr, texto);
+        doc.setCharacterAttributes(0, doc.getLength(), attr, true);
+
+        textPane.setCharacterAttributes(attr, true);
+
+        // Aplicar colores a todos los componentes
+        for (Component comp : frame.getContentPane().getComponents()) {
+            aplicarColores(comp, fondoVentana, fondoEditor, texto, botones);
+        }
+
+        // UIManager: JOptionPane / JFileChooser / Buscar
+        UIManager.put("Panel.background", fondoVentana);
+        UIManager.put("OptionPane.background", fondoVentana);
+        UIManager.put("OptionPane.messageForeground", texto);
+        UIManager.put("Button.background", botones);
+        UIManager.put("Button.foreground", texto);
+        UIManager.put("TextField.background", fondoEditor);
+        UIManager.put("TextField.foreground", texto);
+        UIManager.put("Label.foreground", texto);
+
+        frame.repaint();
+    }
+
+    private static void aplicarColores(Component comp, Color fondoVentana, Color fondoEditor, Color texto, Color boton) {
+
+        if (comp instanceof JPanel) {
+            comp.setBackground(fondoVentana);
+            for (Component c : ((JPanel) comp).getComponents()) {
+                aplicarColores(c, fondoVentana, fondoEditor, texto, boton);
+            }
+        }
+
+        else if (comp instanceof JButton || comp instanceof JToggleButton) {
+            comp.setBackground(boton);
+            comp.setForeground(texto);
+            ((AbstractButton) comp).setBorderPainted(false);
+            ((AbstractButton) comp).setFocusPainted(false);
+        }
+
+        else if (comp instanceof JLabel) {
+            comp.setForeground(texto);
+        }
+
+        else if (comp instanceof JScrollPane) {
+            comp.setBackground(fondoVentana);
+            JScrollPane sp = (JScrollPane) comp;
+            sp.getViewport().getView().setBackground(fondoEditor);
+            sp.getViewport().getView().setForeground(texto);
+            sp.setBorder(BorderFactory.createEmptyBorder());
         }
     }
 
