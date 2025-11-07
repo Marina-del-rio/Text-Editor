@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 
 public class EditorActions {
 
-    public static void configurarAtajos(JTextPane textPane, JToggleButton btnNegrita, JToggleButton btnCursiva, UndoManager undoManager, JFrame principal) {
+    public static void configurarAtajos(JTextPane textPane, JToggleButton btnNegrita, JToggleButton btnCursiva, UndoManager undoManager, JFrame principal, JProgressBar progressBar) {
 
         // Ctrl + M
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control M"), "mayus");
@@ -90,7 +90,7 @@ public class EditorActions {
         textPane.getActionMap().put("guardar", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EditorController.guardarArchivo(principal, textPane);
+                EditorController.guardarArchivo(principal, textPane, progressBar);
             }
         });
 
@@ -99,7 +99,7 @@ public class EditorActions {
         textPane.getActionMap().put("abrir", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EditorController.abrirArchivo(principal, textPane);
+                EditorController.abrirArchivo(principal, textPane, progressBar);
             }
         });
     }

@@ -72,15 +72,32 @@ public class EditorFrame extends JFrame {
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         area.add(scroll, BorderLayout.CENTER);
+        principal.add(area, BorderLayout.CENTER);
 
-        //Contador dinámico
+        // Contador dinámico y barra progreso
+        JPanel panelInferior = new JPanel(new BorderLayout());
+        panelInferior.setBackground(Color.WHITE);
+
         JLabel cont = new JLabel("Líneas: 0 | Palabras: 0");
         cont.setFont(new Font("Calibri", Font.PLAIN, 13));
         cont.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        textPane.getDocument().addDocumentListener(EditorController.crearContador(textPane, cont));//El DocumentLstener es un oyente que se activa cada vez que el texto cambia
-        area.add(cont, BorderLayout.SOUTH);
+        panelInferior.add(cont, BorderLayout.WEST);
 
-        principal.add(area, BorderLayout.CENTER);
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setVisible(false);
+        progressBar.setIndeterminate(false);
+        progressBar.setStringPainted(true);
+        progressBar.setPreferredSize(new Dimension(150, 18));
+        progressBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        panelInferior.add(progressBar, BorderLayout.EAST);
+
+        textPane.getDocument().addDocumentListener(
+                EditorController.crearContador(textPane, cont)
+        );
+
+        area.add(panelInferior, BorderLayout.SOUTH);
+
+
 
         // Acciones de transformación de texto
         btnMayus.addActionListener(e -> EditorController.transformarSeleccion(textPane, true));
@@ -99,11 +116,11 @@ public class EditorFrame extends JFrame {
 
         //Guardar
         btnGuardar.addActionListener(e ->
-                EditorController.guardarArchivo(principal, textPane));
+                EditorController.guardarArchivo(principal, textPane, progressBar));
 
         //Abrir
         btnAbrir.addActionListener(e ->
-                EditorController.abrirArchivo(principal, textPane));
+                EditorController.abrirArchivo(principal, textPane, progressBar));
 
 
         //ModoOscuro
@@ -116,7 +133,7 @@ public class EditorFrame extends JFrame {
         UndoManager undoManager = new UndoManager();
         textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto
 
-        EditorActions.configurarAtajos(textPane, btnNegrita, btnCursiva, undoManager, principal);
+        EditorActions.configurarAtajos(textPane, btnNegrita, btnCursiva, undoManager, principal, progressBar);
 
         EditorController.configurarMenuContextual(textPane);
 

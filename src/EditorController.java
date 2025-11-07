@@ -1,3 +1,5 @@
+import org.w3c.dom.Attr;
+
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -6,6 +8,11 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.nio.file.Files;
 import java.util.Enumeration;
 
 public class EditorController {
@@ -252,46 +259,193 @@ public class EditorController {
     }
 
     //Menu guardar
-    public static void guardarArchivo(JFrame frame, JTextPane textPane) {
-        JFileChooser fc = new JFileChooser();
-        fc.setDialogTitle("Guardar archivo");
+    public static void guardarArchivo(JFrame frame, JTextPane textPane, JProgressBar progressBar) {
+        FileDialog fd = new FileDialog(frame, "Guardar archivo", FileDialog.SAVE);
+        fd.setFile("*.txt");
+        fd.setVisible(true);
 
-        int seleccion = fc.showSaveDialog(frame);
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            java.io.File archivo = fc.getSelectedFile();
-            if (!archivo.getName().toLowerCase().endsWith(".txt")) {
-                archivo = new java.io.File(archivo.getAbsolutePath() + ".txt");
-            }
+        String file = fd.getFile();
+        String dir = fd.getDirectory();
+        if (file == null) return; // Usuario canceló
 
-            try (java.io.FileWriter writer = new java.io.FileWriter(archivo)) {
-                writer.write(textPane.getText());
-                JOptionPane.showMessageDialog(frame, "Archivo guardado correctamente.");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Error al guardar el archivo: " + ex.getMessage());
-            }
+        if (!file.toLowerCase().endsWith(".txt")) {
+            file += ".txt";
         }
+
+        java.io.File archivo = new java.io.File(dir, file);
+
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                progressBar.setVisible(true);
+                progressBar.setIndeterminate(false);
+                progressBar.setValue(0);
+                progressBar.setString("Guardando archivo...");
+
+                StyledDocument doc = textPane.getStyledDocument();
+                StringBuilder contenido = new StringBuilder();
+
+                Element root = doc.getDefaultRootElement();
+                int numElems = root.getElementCount();
+
+
+                for (int i = 0; i < numElems; i++) {
+                    Element parrafo = root.getElement(i);
+                    int numHijos = parrafo.getElementCount();
+
+                    for (int j = 0; j < numHijos; j++) {
+                        Element elem = parrafo.getElement(j);
+                        AttributeSet attrs = elem.getAttributes();
+                        boolean bold = StyleConstants.isBold(attrs);
+                        boolean italic = StyleConstants.isItalic(attrs);
+
+                        int start = elem.getStartOffset();
+                        int end = elem.getEndOffset();
+                        String text = doc.getText(start, end - start);
+
+                        if (bold && italic) {
+                            contenido.append("***").append(text.trim()).append("***");
+                        } else if (bold) {
+                            contenido.append("**").append(text.trim()).append("**");
+                        } else if (italic) {
+                            contenido.append("_").append(text.trim()).append("_");
+                        } else {
+                            contenido.append(text);
+                        }
+                    }
+
+                    contenido.append("\n");
+
+                    // Calcula progreso (en porcentaje)
+                    int progreso = (int) (((i + 1) / (double) numElems) * 100);
+                    setProgress(Math.min(progreso, 100));
+
+                    Thread.sleep(10);
+                }
+
+                // Guardar el contenido final en el archivo
+                try (java.io.FileWriter writer = new java.io.FileWriter(archivo)) {
+                    writer.write(contenido.toString());
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                progressBar.setString("Guardado completado");
+                progressBar.setValue(100);
+
+                Timer timer = new Timer(800, e -> progressBar.setVisible(false));
+                timer.setRepeats(false);
+                timer.start();
+
+                JOptionPane.showMessageDialog(frame, "Archivo guardado correctamente.");
+            }
+        };
+
+
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                int value = (Integer) evt.getNewValue();
+                progressBar.setValue(value);
+                progressBar.setString("Guardando: " + value + "%");
+            }
+        });
+
+        worker.execute();
     }
 
     //Menu abrir
-    public static void abrirArchivo(JFrame frame, JTextPane textPane) {
-        JFileChooser fc = new JFileChooser();
-        fc.setDialogTitle("Abrir archivo");
+    public static void abrirArchivo(JFrame frame, JTextPane textPane, JProgressBar progressBar) {
+        FileDialog fd = new FileDialog(frame, "Abrir archivo", FileDialog.LOAD);
+        fd.setVisible(true);
 
-        int seleccion = fc.showOpenDialog(frame);
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            java.io.File archivo = fc.getSelectedFile();
+        String file = fd.getFile();
+        String dir = fd.getDirectory();
+        if (file == null) return; // Usuario canceló
 
-            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
-                StringBuilder contenido = new StringBuilder();
-                String linea;
-                while ((linea = reader.readLine()) != null) {
-                    contenido.append(linea).append("\n");
+        File archivo = new File(dir, file);
+
+
+        SwingWorker<String, Integer> worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                progressBar.setVisible(true);
+                progressBar.setValue(0);
+                progressBar.setStringPainted(true);
+                progressBar.setString("Cargando archivo...");
+
+                if (!archivo.exists()) {
+                    throw new Exception("El archivo no existe");
                 }
-                textPane.setText(contenido.toString());
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Error al abrir el archivo: " + ex.getMessage());
+
+                long total = archivo.length();
+
+                if (total == 0) {
+                    progressBar.setIndeterminate(true);
+                    progressBar.setString("Archivo vacío");
+                }
+
+                StringBuilder contenido = new StringBuilder();
+                long leido = 0;
+
+                try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+                    String linea;
+                    while ((linea = reader.readLine()) != null) {
+                        contenido.append(linea).append("\n");
+                        leido += linea.length() + 1;
+
+                        if (total > 0) {
+                            int progreso = (int) ((leido * 100) / total);
+                            setProgress(Math.min(progreso, 100));
+                        }
+                    }
+                }
+
+
+                return contenido.toString();
             }
-        }
+
+            @Override
+            protected void done() {
+                try {
+                    String texto = get();
+
+
+                    StyledDocument doc = textPane.getStyledDocument();
+                    doc.remove(0, doc.getLength());
+                    doc.insertString(0, texto, null);
+
+                    progressBar.setIndeterminate(false);
+                    progressBar.setValue(100);
+                    progressBar.setString("Carga completada");
+
+                    Timer timer = new Timer(1000, e -> progressBar.setVisible(false));
+                    timer.setRepeats(false);
+                    timer.start();
+
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Error al abrir archivo: " + e.getMessage(),
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    progressBar.setVisible(false);
+                }
+            }
+        };
+
+        worker.addPropertyChangeListener(evt -> {
+            if ("progress".equals(evt.getPropertyName())) {
+                int value = (Integer) evt.getNewValue();
+                progressBar.setValue(value);
+                progressBar.setString("Cargando: " + value + "%");
+
+            }
+        });
+
+        worker.execute();
     }
 
     public static boolean esModoOscuro = false;
@@ -365,6 +519,25 @@ public class EditorController {
             sp.getViewport().getView().setBackground(fondoEditor);
             sp.getViewport().getView().setForeground(texto);
             sp.setBorder(BorderFactory.createEmptyBorder());
+
+            // 🔽 NUEVO: aplicar color también a las barras de scroll
+            JScrollBar vBar = sp.getVerticalScrollBar();
+            JScrollBar hBar = sp.getHorizontalScrollBar();
+            if (vBar != null) {
+                vBar.setBackground(fondoVentana);
+                vBar.setForeground(boton);
+            }
+            if (hBar != null) {
+                hBar.setBackground(fondoVentana);
+                hBar.setForeground(boton);
+            }
+        }
+
+        else if (comp instanceof JProgressBar) {
+            comp.setBackground(fondoVentana);
+            ((JProgressBar) comp).setForeground(boton);
+            ((JProgressBar) comp).setStringPainted(true);
+            ((JProgressBar) comp).setBorder(BorderFactory.createLineBorder(boton.darker(), 1));
         }
     }
 
