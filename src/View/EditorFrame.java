@@ -1,8 +1,12 @@
+package View;
+
+import Components.*;
+import Controller.EditorActions;
+import Controller.EditorController;
+
 import javax.swing.*;
-import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
-import java.awt.event.*;
 
 public class EditorFrame extends JFrame {
     public EditorFrame() {
@@ -74,7 +78,7 @@ public class EditorFrame extends JFrame {
         area.add(scroll, BorderLayout.CENTER);
         principal.add(area, BorderLayout.CENTER);
 
-        // Contador dinámico y barra progreso
+        // Contador dinámico y progressLabel
         JPanel panelInferior = new JPanel(new BorderLayout());
         panelInferior.setBackground(Color.WHITE);
 
@@ -83,13 +87,10 @@ public class EditorFrame extends JFrame {
         cont.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         panelInferior.add(cont, BorderLayout.WEST);
 
-        JProgressBar progressBar = new JProgressBar();
-        progressBar.setVisible(false);
-        progressBar.setIndeterminate(false);
-        progressBar.setStringPainted(true);
-        progressBar.setPreferredSize(new Dimension(150, 18));
-        progressBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        panelInferior.add(progressBar, BorderLayout.EAST);
+        ProgressLabel progressLabel = new ProgressLabel("Listo");
+        progressLabel.setPreferredSize(new Dimension(150, 18));
+        progressLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        panelInferior.add(progressLabel, BorderLayout.EAST);
 
         textPane.getDocument().addDocumentListener(
                 EditorController.crearContador(textPane, cont)
@@ -116,11 +117,11 @@ public class EditorFrame extends JFrame {
 
         //Guardar
         btnGuardar.addActionListener(e ->
-                EditorController.guardarArchivo(principal, textPane, progressBar));
+                EditorController.guardarArchivo(principal, textPane, progressLabel));
 
         //Abrir
         btnAbrir.addActionListener(e ->
-                EditorController.abrirArchivo(principal, textPane, progressBar));
+                EditorController.abrirArchivo(principal, textPane, progressLabel));
 
 
         //ModoOscuro
@@ -133,7 +134,7 @@ public class EditorFrame extends JFrame {
         UndoManager undoManager = new UndoManager();
         textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto
 
-        EditorActions.configurarAtajos(textPane, btnNegrita, btnCursiva, undoManager, principal, progressBar);
+        EditorActions.configurarAtajos(textPane, btnNegrita, btnCursiva, undoManager, principal, progressLabel);
 
         EditorController.configurarMenuContextual(textPane);
 

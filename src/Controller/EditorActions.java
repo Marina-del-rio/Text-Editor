@@ -1,3 +1,6 @@
+package Controller;
+
+import Components.*;
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.undo.UndoManager;
@@ -6,7 +9,7 @@ import java.awt.event.ActionEvent;
 
 public class EditorActions {
 
-    public static void configurarAtajos(JTextPane textPane, JToggleButton btnNegrita, JToggleButton btnCursiva, UndoManager undoManager, JFrame principal, JProgressBar progressBar) {
+    public static void configurarAtajos(JTextPane textPane, JToggleButton btnNegrita, JToggleButton btnCursiva, UndoManager undoManager, JFrame principal, ProgressLabel progressLabel) {
 
         // Ctrl + M
         textPane.getInputMap().put(KeyStroke.getKeyStroke("control M"), "mayus");
@@ -90,7 +93,7 @@ public class EditorActions {
         textPane.getActionMap().put("guardar", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EditorController.guardarArchivo(principal, textPane, progressBar);
+                EditorController.guardarArchivo(principal, textPane, progressLabel);
             }
         });
 
@@ -99,7 +102,7 @@ public class EditorActions {
         textPane.getActionMap().put("abrir", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EditorController.abrirArchivo(principal, textPane, progressBar);
+                EditorController.abrirArchivo(principal, textPane, progressLabel);
             }
         });
     }
