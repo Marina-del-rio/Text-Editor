@@ -10,13 +10,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Gestiona las operaciones de guardado y apertura de archivos para un JTextPane,
- * manejando los estilos de texto y realizando las operaciones en segundo plano
- * para no congelar la interfaz de usuario.
+ * Gestiona las operaciones de guardado y apertura de archivos para un JTextPane.
  */
 public class FileHandler {
 
-    // --- ESTILOS PREDEFINIDOS ---
+    // --- ESTILOS PREDEFINIDOS (Sin cambios) ---
     private static final SimpleAttributeSet STYLE_NORMAL = new SimpleAttributeSet();
     private static final SimpleAttributeSet STYLE_BOLD;
     private static final SimpleAttributeSet STYLE_ITALIC;
@@ -37,10 +35,14 @@ public class FileHandler {
     private static class StyledTextChunk {
         final String text;
         final AttributeSet style;
-        StyledTextChunk(String text, AttributeSet style) { this.text = text; this.style = style; }
+
+        StyledTextChunk(String text, AttributeSet style) {
+            this.text = text;
+            this.style = style;
+        }
     }
 
-    //GUARDAR ARCHIVO
+    // --- GUARDAR ARCHIVO ---
     public void guardarArchivo(JFrame frame, JTextPane textPane, ProgressLabel progressLabel) {
         FileDialog fd = new FileDialog(frame, "Guardar archivo", FileDialog.SAVE);
         fd.setFile("*.txt");
@@ -48,7 +50,7 @@ public class FileHandler {
 
         String file = fd.getFile();
         String dir = fd.getDirectory();
-        if (file == null) return; // Usuario canceló
+        if (file == null) return;
 
         if (!file.toLowerCase().endsWith(".txt")) {
             file += ".txt";
@@ -67,13 +69,14 @@ public class FileHandler {
 
             @Override
             protected void process(List<Integer> chunks) {
-                progressLabel.updateProgress("Guardando", chunks.get(chunks.size() - 1));
+                // CAMBIO AQUÍ: Texto estático "Guardando..." en vez de dinámico si lo tuvieras
+                progressLabel.updateProgress("Guardando...", chunks.get(chunks.size() - 1));
             }
 
             @Override
             protected void done() {
                 try {
-                    get(); // Verifica si hubo errores
+                    get();
                     progressLabel.finishTask("Guardado completado");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -87,6 +90,7 @@ public class FileHandler {
     }
 
     private String convertirEstilosAMarcas(StyledDocument doc, Consumer<Integer> progressUpdater) throws BadLocationException {
+        // (El contenido de este método sigue igual que en tu código original)
         StringBuilder contenido = new StringBuilder();
         Element root = doc.getDefaultRootElement();
         int numElems = root.getElementCount();
@@ -119,8 +123,7 @@ public class FileHandler {
     }
 
 
-
-    // ABRIR ARCHIVO
+    // --- ABRIR ARCHIVO ---
     public void abrirArchivo(JFrame frame, JTextPane textPane, ProgressLabel progressLabel) {
 
         FileDialog fd = new FileDialog(frame, "Abrir archivo", FileDialog.LOAD);
@@ -129,63 +132,54 @@ public class FileHandler {
 
         String file = fd.getFile();
         String dir = fd.getDirectory();
-        if (file == null) return; // cancelado
+        if (file == null) return;
 
         File archivo = new File(dir, file);
 
         progressLabel.startTask("Cargando archivo...");
         progressLabel.setVisible(true);
 
-        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+        SwingWorker<DefaultStyledDocument, Integer> worker = new SwingWorker<>() {
 
             @Override
-            protected Void doInBackground() throws Exception {
-
+            protected DefaultStyledDocument doInBackground() throws Exception {
                 long total = archivo.length();
                 long leido = 0;
 
-                StyledDocument doc = textPane.getStyledDocument();
-                doc.remove(0, doc.getLength()); // limpiar antes de insertar
+                DefaultStyledDocument docMemoria = new DefaultStyledDocument();
 
                 try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-
                     String linea;
                     while ((linea = br.readLine()) != null) {
-
-                        // Convertir la línea en fragmentos con estilo
-                        parseLineAndPublish(linea, chunk -> {
-                            try {
-                                doc.insertString(doc.getLength(), chunk.text, chunk.style);
-                            } catch (BadLocationException e) {
-                                e.printStackTrace();
-                            }
-                        });
-
-                        // Progreso en tiempo real
+                        parseLineToDoc(linea, docMemoria);
                         leido += linea.getBytes(StandardCharsets.UTF_8).length + 1;
-                        int progreso = (int)((leido * 100) / total);
+                        int progreso = (int) ((leido * 100) / total);
                         publish(progreso);
                     }
                 }
-                return null;
+                return docMemoria;
             }
 
             @Override
             protected void process(List<Integer> chunks) {
                 int progreso = chunks.get(chunks.size() - 1);
-                progressLabel.updateProgress("Cargando... " + progreso + "%", progreso);
+
+                // --- CAMBIO REALIZADO AQUÍ ---
+                // Antes: progressLabel.updateProgress( progreso + "%", progreso);
+                // Ahora: Pasamos el texto fijo "Cargando..." y el valor numérico aparte.
+                progressLabel.updateProgress("Cargando...", progreso);
             }
 
             @Override
             protected void done() {
                 try {
-                    get();
-                    progressLabel.finishTask("Archivo cargado");
+                    DefaultStyledDocument nuevoDoc = get();
+                    textPane.setStyledDocument(nuevoDoc);
+                    progressLabel.finishTask("Carga completada");
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    progressLabel.showError("Error al cargar archivo");
-                    JOptionPane.showMessageDialog(frame, "Error al abrir el archivo:\n" + ex.getMessage(),
-                            "Error", JOptionPane.ERROR_MESSAGE);
+                    progressLabel.showError("Error al leer");
+                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage());
                 }
             }
         };
@@ -193,22 +187,31 @@ public class FileHandler {
         worker.execute();
     }
 
-
-
-    private void parseLineAndPublish(String linea, Consumer<StyledTextChunk> publisher) {
+    private void parseLineToDoc(String linea, StyledDocument doc) {
+        // (El contenido de este método sigue igual)
         String[] segmentos = linea.split("(?<=\\s)|(?=\\s)");
-        for (String segmento : segmentos) {
-            if (segmento.startsWith("***") && segmento.endsWith("***") && segmento.length() > 5) {
-                publisher.accept(new StyledTextChunk(segmento.substring(3, segmento.length() - 3), STYLE_BOLD_ITALIC));
-            } else if (segmento.startsWith("**") && segmento.endsWith("**") && segmento.length() > 3) {
-                publisher.accept(new StyledTextChunk(segmento.substring(2, segmento.length() - 2), STYLE_BOLD));
-            } else if (segmento.startsWith("_") && segmento.endsWith("_") && segmento.length() > 1) {
-                publisher.accept(new StyledTextChunk(segmento.substring(1, segmento.length() - 1), STYLE_ITALIC));
-            } else {
-                publisher.accept(new StyledTextChunk(segmento, STYLE_NORMAL));
-            }
-        }
 
-        publisher.accept(new StyledTextChunk("\n", STYLE_NORMAL));
+        try {
+            for (String segmento : segmentos) {
+                AttributeSet estilo = STYLE_NORMAL;
+                String textoLimpio = segmento;
+
+                if (segmento.startsWith("***") && segmento.endsWith("***") && segmento.length() > 5) {
+                    textoLimpio = segmento.substring(3, segmento.length() - 3);
+                    estilo = STYLE_BOLD_ITALIC;
+                } else if (segmento.startsWith("**") && segmento.endsWith("**") && segmento.length() > 3) {
+                    textoLimpio = segmento.substring(2, segmento.length() - 2);
+                    estilo = STYLE_BOLD;
+                } else if (segmento.startsWith("_") && segmento.endsWith("_") && segmento.length() > 1) {
+                    textoLimpio = segmento.substring(1, segmento.length() - 1);
+                    estilo = STYLE_ITALIC;
+                }
+                doc.insertString(doc.getLength(), textoLimpio, estilo);
+            }
+            doc.insertString(doc.getLength(), "\n", STYLE_NORMAL);
+
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 }

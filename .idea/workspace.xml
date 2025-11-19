@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6fa21a4c-d54d-4145-9618-c43c55952b56" name="Changes" comment="New fixes and new classes" />
+    <list default="true" id="6fa21a4c-d54d-4145-9618-c43c55952b56" name="Changes" comment="New fixes and new classes">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/FileHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/FileHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Components/ProgressLabel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Components/ProgressLabel.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -69,6 +73,8 @@
       <updated>1763403046834</updated>
       <workItem from="1763403048472" duration="1434000" />
       <workItem from="1763486721884" duration="1555000" />
+      <workItem from="1763541003673" duration="123000" />
+      <workItem from="1763545083638" duration="7416000" />
     </task>
     <task id="LOCAL-00001" summary="New fixes and new classes">
       <option name="closed" value="true" />
@@ -78,7 +84,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763488238361</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="New fixes and new classes">
+      <option name="closed" value="true" />
+      <created>1763541116859</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1763541116859</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

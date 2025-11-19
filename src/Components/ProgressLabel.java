@@ -10,8 +10,8 @@ public class ProgressLabel extends JPanel {
     public final String defaultText;
 
     // Colores diferentes resultados
-    private final Color SUCCESS_COLOR = new Color(34, 139, 34); // Verde oscuro
-    private final Color ERROR_COLOR = new Color(220, 20, 60);   // Rojo carmesí
+    private final Color SUCCESS_COLOR = new Color(34, 139, 34);
+    private final Color ERROR_COLOR = new Color(220, 20, 60);
 
     private Color foregroundColor = Color.BLACK;
 
@@ -34,6 +34,8 @@ public class ProgressLabel extends JPanel {
         label.setForeground(foregroundColor);
 
         progressBar.setValue(0);
+        progressBar.setStringPainted(true);
+        progressBar.setString("0%");
         progressBar.setVisible(true);
     }
 
@@ -41,6 +43,8 @@ public class ProgressLabel extends JPanel {
         label.setText(nomTarea);
 
         progressBar.setValue(progreso);
+        progressBar.setStringPainted(true);
+        progressBar.setString(progreso + "%");
     }
 
     public void finishTask(String mensaje) {
@@ -48,6 +52,7 @@ public class ProgressLabel extends JPanel {
         label.setForeground(SUCCESS_COLOR);
 
         progressBar.setValue(100);
+        progressBar.setString("100%");
 
         hideAfterDelay();
     }
@@ -81,11 +86,11 @@ public class ProgressLabel extends JPanel {
             label.setForeground(foregroundColor); // Restablecer al color por defecto
 
             progressBar.setValue(0);
+            progressBar.setStringPainted(false); // Desactivar el texto al ocultar
             progressBar.setForeground(UIManager.getColor("ProgressBar.foreground"));
 
         });
         timer.setRepeats(false);
         timer.start();
     }
-
 }
