@@ -5,16 +5,12 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Gestiona las operaciones de guardado y apertura de archivos para un JTextPane.
- */
 public class FileHandler {
 
-    // --- ESTILOS PREDEFINIDOS (Sin cambios) ---
+    //ESTILOS PREDEFINIDOS
     private static final SimpleAttributeSet STYLE_NORMAL = new SimpleAttributeSet();
     private static final SimpleAttributeSet STYLE_BOLD;
     private static final SimpleAttributeSet STYLE_ITALIC;
@@ -30,16 +26,6 @@ public class FileHandler {
         STYLE_BOLD_ITALIC = new SimpleAttributeSet();
         StyleConstants.setBold(STYLE_BOLD_ITALIC, true);
         StyleConstants.setItalic(STYLE_BOLD_ITALIC, true);
-    }
-
-    private static class StyledTextChunk {
-        final String text;
-        final AttributeSet style;
-
-        StyledTextChunk(String text, AttributeSet style) {
-            this.text = text;
-            this.style = style;
-        }
     }
 
     // --- GUARDAR ARCHIVO ---
@@ -69,7 +55,6 @@ public class FileHandler {
 
             @Override
             protected void process(List<Integer> chunks) {
-                // CAMBIO AQUÍ: Texto estático "Guardando..." en vez de dinámico si lo tuvieras
                 progressLabel.updateProgress("Guardando...", chunks.get(chunks.size() - 1));
             }
 
@@ -90,7 +75,6 @@ public class FileHandler {
     }
 
     private String convertirEstilosAMarcas(StyledDocument doc, Consumer<Integer> progressUpdater) throws BadLocationException {
-        // (El contenido de este método sigue igual que en tu código original)
         StringBuilder contenido = new StringBuilder();
         Element root = doc.getDefaultRootElement();
         int numElems = root.getElementCount();
@@ -123,7 +107,7 @@ public class FileHandler {
     }
 
 
-    // --- ABRIR ARCHIVO ---
+    // ABRIR ARCHIVO
     public void abrirArchivo(JFrame frame, JTextPane textPane, ProgressLabel progressLabel) {
 
         FileDialog fd = new FileDialog(frame, "Abrir archivo", FileDialog.LOAD);
@@ -163,10 +147,6 @@ public class FileHandler {
             @Override
             protected void process(List<Integer> chunks) {
                 int progreso = chunks.get(chunks.size() - 1);
-
-                // --- CAMBIO REALIZADO AQUÍ ---
-                // Antes: progressLabel.updateProgress( progreso + "%", progreso);
-                // Ahora: Pasamos el texto fijo "Cargando..." y el valor numérico aparte.
                 progressLabel.updateProgress("Cargando...", progreso);
             }
 
@@ -188,7 +168,6 @@ public class FileHandler {
     }
 
     private void parseLineToDoc(String linea, StyledDocument doc) {
-        // (El contenido de este método sigue igual)
         String[] segmentos = linea.split("(?<=\\s)|(?=\\s)");
 
         try {
