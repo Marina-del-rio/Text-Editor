@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6fa21a4c-d54d-4145-9618-c43c55952b56" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Components/FileHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Components/ProgressLabel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/artifacts/UT1_PR3_MarinadelRio_jar.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EditorActions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/EditorActions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EditorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/EditorController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EditorFrame.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/EditorFrame.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-    </list>
+    <list default="true" id="6fa21a4c-d54d-4145-9618-c43c55952b56" name="Changes" comment="New fixes and new classes" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -79,11 +68,24 @@
       <option name="presentableId" value="Default" />
       <updated>1763403046834</updated>
       <workItem from="1763403048472" duration="1434000" />
-      <workItem from="1763486721884" duration="1346000" />
+      <workItem from="1763486721884" duration="1555000" />
     </task>
+    <task id="LOCAL-00001" summary="New fixes and new classes">
+      <option name="closed" value="true" />
+      <created>1763488238361</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1763488238361</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="New fixes and new classes" />
+    <option name="LAST_COMMIT_MESSAGE" value="New fixes and new classes" />
   </component>
 </project>
