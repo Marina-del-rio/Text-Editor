@@ -1,0 +1,43 @@
+DESCRIPCIÓN
+
+Este proyecto es un editor de texto desarrollado en JavaSwing que permite trabajar con estilos (negrita, cursiva, ambos).
+Así como abrir, guardar y buscar yy reemplazar texto en archivos tipo .txt.
+
+ Cuenta con un contador de lineas y palabras, barra de progreso para operaciones largas
+ y aunque la práctica no lo pedía, tiene un modo oscuro.
+
+ CARACTERÍSTICAS PRINCIPALES
+ - Estilos de texto:
+        Negrita
+        Cursiva
+        Combinación negrita + cursiva
+        Conversión de texto a mayúsculas (Ctrl+M) o minúsculas (Ctrl+N)
+
+ - Gestión de archivos:
+        Abrir y guardar archivos .txt
+        Los estilos se mantienen usando marcas tipo Markdown:
+            **texto** → negrita
+            _texto_ → cursiva
+            ***texto*** → negrita + cursiva
+
+ - Búsqueda y reemplazo:
+        Resalta coincidencias
+        Permite reemplazo de texto
+        Ignora mayúsculas/minúsculas
+
+ - Modo oscuro:
+        Alterna entre modo claro y oscuro
+        Colores adaptados para JTextPane, botones, paneles y menús contextuales
+
+ - Contador dinámico:
+        Muestra líneas y palabras en tiempo real
+
+ - Deshacer/Rehacer
+
+ - Barra de progreso:
+    Indica el progreso al abrir o guardar archivos grandes
+    Muestra mensajes de éxito o error
+
+ - Popup con clic derecho para copiar, pegar y cortar
+
+ - Casi todas las acciones cuentan con sus atajos de teclado indicados al pasar el ratón por los botones.

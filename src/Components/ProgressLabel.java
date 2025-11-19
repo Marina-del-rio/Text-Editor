@@ -3,11 +3,12 @@ package Components;
 import javax.swing.*;
 import java.awt.*;
 
-public class ProgressLabel extends JPanel {
+public class ProgressLabel extends JPanel {//Al extender JPanel es un componente que se puede colocar en cuaslquier ventana
+
     public final JLabel label;
     public final JProgressBar progressBar;
 
-    public final String defaultText;
+    public final String defaultText;//Texto que se muestra al finalizar una tarea
 
     // Colores diferentes resultados
     private final Color SUCCESS_COLOR = new Color(34, 139, 34);
@@ -15,6 +16,7 @@ public class ProgressLabel extends JPanel {
 
     private Color foregroundColor = Color.BLACK;
 
+    //Inicializa los componentes y los coloca en el layout
     public ProgressLabel(String defaultText) {
         super(new BorderLayout(5, 0));
 
@@ -29,6 +31,7 @@ public class ProgressLabel extends JPanel {
         progressBar.setVisible(false);//No se debe ver la barra
     }
 
+    //Muestra el mensaje de la tarea al iniciar, pone el porcentaje a 0 y pone visible la barra
     public void startTask(String mensaje) {
         label.setText(mensaje);
         label.setForeground(foregroundColor);
@@ -39,6 +42,7 @@ public class ProgressLabel extends JPanel {
         progressBar.setVisible(true);
     }
 
+    //Cada vez que el swingWorker hace un publich, se actualiza el porcentaje
     public void updateProgress(String nomTarea, int progreso) {
         label.setText(nomTarea);
 
@@ -47,6 +51,7 @@ public class ProgressLabel extends JPanel {
         progressBar.setString(progreso + "%");
     }
 
+    //Mensaje final y barra al 100%
     public void finishTask(String mensaje) {
         label.setText(mensaje);
         label.setForeground(SUCCESS_COLOR);
@@ -57,6 +62,7 @@ public class ProgressLabel extends JPanel {
         hideAfterDelay();
     }
 
+    //Mensaje de error y cambio de colores
     public void showError(String mensaje) {
         label.setText(mensaje);
         label.setForeground(ERROR_COLOR);
