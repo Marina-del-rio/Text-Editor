@@ -347,12 +347,6 @@ public class EditorController {
             }
         }
 
-        else if (comp instanceof JProgressBar) {
-            comp.setBackground(fondoVentana);
-            ((JProgressBar) comp).setForeground(boton);
-            ((JProgressBar) comp).setStringPainted(true);
-            ((JProgressBar) comp).setBorder(BorderFactory.createLineBorder(boton.darker(), 1));
-        }
     }
 
 }

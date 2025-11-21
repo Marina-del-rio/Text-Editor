@@ -69,6 +69,7 @@ public class EditorFrame extends JFrame {
 
         JPanel area = new JPanel(new BorderLayout());
         JTextPane textPane = new JTextPane();
+        textPane.setEditorKit(new WrapEditorKit());
         textPane.setFont(new Font("Calibri", Font.PLAIN, 15));
         textPane.setMargin(new Insets(10, 10, 10, 10));
         JScrollPane scroll = new JScrollPane(textPane,
