@@ -4,6 +4,10 @@ import Components.*;
 import Controller.EditorActions;
 import Controller.EditorController;
 
+import Nui.*;
+import Nui.adapters.*;
+import Nui.NuiCommand.*;
+
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 import java.awt.*;
@@ -41,7 +45,7 @@ public class EditorFrame extends JFrame {
         btnCursiva.setToolTipText("Cursiva (Ctrl+I)");
         panelBoton.add(btnCursiva);
 
-        // botón de búsqueda, guardar, abrir
+        // botón de búsqueda, guardar, abrir y de voz
         JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panelDerecha.setBackground(Color.WHITE);
 
@@ -52,6 +56,10 @@ public class EditorFrame extends JFrame {
         JButton btnAbrir = EditorController.crearBotonEmoji("📂");
         btnAbrir.setToolTipText("Abrir archivo (Ctrl+O)");
         panelDerecha.add(btnAbrir);
+
+        JButton btnVoz = EditorController.crearBotonEmoji("🎙️");
+        btnVoz.setToolTipText("Abrir simulador de voz");
+        panelDerecha.add(btnVoz);
 
         JButton btnBuscar = EditorController.crearBotonEmoji("🔍");
         btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
@@ -99,8 +107,6 @@ public class EditorFrame extends JFrame {
 
         area.add(panelInferior, BorderLayout.SOUTH);
 
-
-
         // Acciones de transformación de texto
         btnMayus.addActionListener(e -> EditorController.transformarSeleccion(textPane, true));
         btnMinus.addActionListener(e -> EditorController.transformarSeleccion(textPane, false));
@@ -128,16 +134,74 @@ public class EditorFrame extends JFrame {
         //ModoOscuro
         btnModoOsc.addActionListener(e -> {
             EditorController.modoOscuro(principal, textPane);
-
             btnModoOsc.setText(EditorController.esModoOscuro ? "🌕" : "🌔");
         });
 
         UndoManager undoManager = new UndoManager();
-        textPane.getDocument().addUndoableEditListener(undoManager);//El UndoManager registra los cambios de texto
+        textPane.getDocument().addUndoableEditListener(undoManager);
 
         EditorActions.configurarAtajos(textPane, btnNegrita, btnCursiva, undoManager, principal, progressLabel);
 
         EditorController.configurarMenuContextual(textPane);
+
+        // INTEGRACIÓN SIMULADOR DE VOZ
+        NuiController nc = new NuiController();
+
+        btnVoz.addActionListener(e -> {
+            JDialog dialogVoz = new JDialog(principal, "Simulador de Voz", false);
+            SimulatedVoiceAdapter tuPanelDeVoz = new SimulatedVoiceAdapter(nc);
+            dialogVoz.add(tuPanelDeVoz);
+            dialogVoz.pack();
+            dialogVoz.setLocationRelativeTo(principal);
+            dialogVoz.setVisible(true);
+        });
+
+
+        nc.addListener((cmd, payload) -> {
+            System.out.println(">> COMANDO EJECUTADO: " + cmd);
+
+            // Usamos SwingUtilities.invokeLater para encolar la acción y asegurar que
+            // no haya conflictos de hilos.
+            SwingUtilities.invokeLater(() -> {
+                switch (cmd) {
+                    case GUARDAR_DOCUMENTO:
+                        // TRUCO: Traemos la ventana principal al frente y le damos el foco.
+                        // Esto hace que el FileDialog (AWT) sepa dónde "agarrarse" y aparezca correctamente.
+                        principal.toFront();
+                        principal.requestFocus();
+                        EditorController.guardarArchivo(principal, textPane, progressLabel);
+                        break;
+                    case ABRIR_DOCUMENTO:
+                        // Lo mismo para abrir
+                        principal.toFront();
+                        principal.requestFocus();
+                        EditorController.abrirArchivo(principal, textPane, progressLabel);
+                        break;
+                    case APLICAR_NEGRITA:
+                        boolean nuevoNegrita = !btnNegrita.isSelected();
+                        btnNegrita.setSelected(nuevoNegrita);
+                        EditorController.aplicarEstilo(textPane, Font.BOLD, nuevoNegrita);
+                        break;
+                    case APLICAR_CURSIVA:
+                        boolean nuevoCursiva = !btnCursiva.isSelected();
+                        btnCursiva.setSelected(nuevoCursiva);
+                        EditorController.aplicarEstilo(textPane, Font.ITALIC, nuevoCursiva);
+                        break;
+                    case MAYUSCULAS:
+                        EditorController.transformarSeleccion(textPane, true);
+                        break;
+                    case MINUSCULAS:
+                        EditorController.transformarSeleccion(textPane, false);
+                        break;
+                    case DESHACER:
+                        if (undoManager.canUndo()) undoManager.undo();
+                        break;
+                    case REHACER:
+                        if (undoManager.canRedo()) undoManager.redo();
+                        break;
+                }
+            });
+        });
 
         principal.setVisible(true);
     }

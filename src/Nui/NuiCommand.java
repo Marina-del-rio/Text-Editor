@@ -1,0 +1,12 @@
+package Nui;
+
+public enum NuiCommand {
+    ABRIR_DOCUMENTO,
+    GUARDAR_DOCUMENTO,
+    APLICAR_NEGRITA,
+    APLICAR_CURSIVA,
+    MAYUSCULAS,
+    MINUSCULAS,
+    DESHACER,
+    REHACER,
+}
