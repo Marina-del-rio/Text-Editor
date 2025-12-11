@@ -45,7 +45,7 @@ public class EditorFrame extends JFrame {
         btnCursiva.setToolTipText("Cursiva (Ctrl+I)");
         panelBoton.add(btnCursiva);
 
-        // botón de búsqueda, guardar, abrir y de voz
+        // botón de búsqueda, guardar, abrir
         JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         panelDerecha.setBackground(Color.WHITE);
 
@@ -56,10 +56,6 @@ public class EditorFrame extends JFrame {
         JButton btnAbrir = EditorController.crearBotonEmoji("📂");
         btnAbrir.setToolTipText("Abrir archivo (Ctrl+O)");
         panelDerecha.add(btnAbrir);
-
-        JButton btnVoz = EditorController.crearBotonEmoji("🎙️");
-        btnVoz.setToolTipText("Abrir simulador de voz");
-        panelDerecha.add(btnVoz);
 
         JButton btnBuscar = EditorController.crearBotonEmoji("🔍");
         btnBuscar.setToolTipText("Buscar/reemplazar (Ctrl+F)");
@@ -145,36 +141,28 @@ public class EditorFrame extends JFrame {
         EditorController.configurarMenuContextual(textPane);
 
         // INTEGRACIÓN SIMULADOR DE VOZ
+        // Iniciar controlador
         NuiController nc = new NuiController();
 
-        btnVoz.addActionListener(e -> {
-            JDialog dialogVoz = new JDialog(principal, "Simulador de Voz", false);
-            SimulatedVoiceAdapter tuPanelDeVoz = new SimulatedVoiceAdapter(nc);
-            dialogVoz.add(tuPanelDeVoz);
-            dialogVoz.pack();
-            dialogVoz.setLocationRelativeTo(principal);
-            dialogVoz.setVisible(true);
-        });
+        // Instanciar el adaptador de voz
+        VoskAdapter vozAdapter = new VoskAdapter(nc);
 
+        // Añadir a la barra inferior aviso escucha activa
+        vozAdapter.setOpaque(false);
+        vozAdapter.setPreferredSize(new Dimension(200, 30));
+        panelInferior.add(vozAdapter, BorderLayout.CENTER);
 
+        // Configuracion de acciones
         nc.addListener((cmd, payload) -> {
-            System.out.println(">> COMANDO EJECUTADO: " + cmd);
 
-            // Usamos SwingUtilities.invokeLater para encolar la acción y asegurar que
-            // no haya conflictos de hilos.
             SwingUtilities.invokeLater(() -> {
                 switch (cmd) {
                     case GUARDAR_DOCUMENTO:
-                        // TRUCO: Traemos la ventana principal al frente y le damos el foco.
-                        // Esto hace que el FileDialog (AWT) sepa dónde "agarrarse" y aparezca correctamente.
                         principal.toFront();
-                        principal.requestFocus();
                         EditorController.guardarArchivo(principal, textPane, progressLabel);
                         break;
                     case ABRIR_DOCUMENTO:
-                        // Lo mismo para abrir
                         principal.toFront();
-                        principal.requestFocus();
                         EditorController.abrirArchivo(principal, textPane, progressLabel);
                         break;
                     case APLICAR_NEGRITA:
