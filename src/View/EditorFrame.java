@@ -30,11 +30,11 @@ public class EditorFrame extends JFrame {
         JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         panelBoton.setBackground(Color.WHITE);
 
-        JButton btnMayus = EditorController.crearBoton("A");
-        btnMayus.setToolTipText("Mayúsculas (Ctrl+M)");
+        JButton btnMayus = EditorController.crearBoton("ABC");
+        btnMayus.setToolTipText("Convertir a Mayúsculas (Ctrl+M)");
         panelBoton.add(btnMayus);
-        JButton btnMinus = EditorController.crearBoton("a");
-        btnMinus.setToolTipText("Minúsculas (Ctrl+N)");
+        JButton btnMinus = EditorController.crearBoton("abc");
+        btnMinus.setToolTipText("Convertir a Minúsculas (Ctrl+N)");
         panelBoton.add(btnMinus);
 
         JToggleButton btnNegrita = EditorController.crearBotonToggle("B", Font.BOLD);

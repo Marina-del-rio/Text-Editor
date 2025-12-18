@@ -164,47 +164,104 @@ public class EditorController {
 
     //buscarRemplazar en JOption
     public static void buscarRemplazar(JFrame frame, JTextPane textPane) {
-        String[] opciones = {"Solo Buscar", "Buscar y Reemplazar"};
-        int seleccion = JOptionPane.showOptionDialog(frame,
-                "Elige una opción:",
-                "Buscar / Reemplazar",
+        // Crear panel con todos los campos
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Campo Buscar
+        JLabel lblBuscar = new JLabel("Buscar:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0;
+        panel.add(lblBuscar, gbc);
+
+        JTextField txtBuscar = new JTextField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 1;
+        panel.add(txtBuscar, gbc);
+
+        // Campo Reemplazar
+        JLabel lblReemplazar = new JLabel("Reemplazar por:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        panel.add(lblReemplazar, gbc);
+
+        JTextField txtReemplazar = new JTextField(20);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.weightx = 1;
+        panel.add(txtReemplazar, gbc);
+
+        // Nota informativa
+        JLabel nota = new JLabel("<html><i>Deja 'Reemplazar por' vacío para solo buscar</i></html>");
+        nota.setFont(new Font("Calibri", Font.PLAIN, 11));
+        nota.setForeground(Color.GRAY);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        panel.add(nota, gbc);
+
+        // Botones personalizados
+        String[] opciones = {"Buscar", "Reemplazar todo", "Cancelar"};
+
+        int resultado = JOptionPane.showOptionDialog(
+                frame,
+                panel,
+                "Buscar y Reemplazar",
                 JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null, opciones, opciones[0]);
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                opciones,
+                opciones[0]
+        );
 
-        if (seleccion == JOptionPane.CLOSED_OPTION) return;
+        // Procesar resultado
+        String buscar = txtBuscar.getText();
+        String reemplazar = txtReemplazar.getText();
 
-        String buscar = JOptionPane.showInputDialog(frame, "Buscar: ");
-        if (buscar == null || buscar.isEmpty()) return;
+        if (resultado == 2 || resultado == JOptionPane.CLOSED_OPTION) {
+            return;
+        }
+
+        if (buscar == null || buscar.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Introduce un texto a buscar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         int encontrados = buscarTexto(textPane, buscar);
 
         if (encontrados == 0) {
-            JOptionPane.showMessageDialog(frame, "No se encontraron coincidencias.");
+            JOptionPane.showMessageDialog(frame, "No se encontraron coincidencias.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        if (seleccion == 1) { // Reemplazar
-            String reemplazar = JOptionPane.showInputDialog(frame, "Reemplazar por: ");
-            if (reemplazar != null) {
-                reemplazarTexto(textPane, buscar, reemplazar);
-                JOptionPane.showMessageDialog(frame, "Reemplazo completado.");
-            }
-        } else {
-            JOptionPane.showMessageDialog(frame, "Se encontraron " + encontrados + " coincidencias resaltadas.");
+        if (resultado == 0) {
+            // Solo buscar
+            JOptionPane.showMessageDialog(frame, "Se encontraron " + encontrados + " coincidencias resaltadas.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
+        } else if (resultado == 1) {
+            // Reemplazar todo
+            if (reemplazar == null) reemplazar = "";
+            reemplazarTexto(textPane, buscar, reemplazar);
+            JOptionPane.showMessageDialog(frame, "Se reemplazaron " + encontrados + " coincidencias.", "Resultado", JOptionPane.INFORMATION_MESSAGE);
         }
 
         // Limpiar resaltado al interactuar con el textPane
         Highlighter highlighter = textPane.getHighlighter();
         textPane.addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) { highlighter.removeAllHighlights(); }
+            public void mousePressed(MouseEvent e) {
+                highlighter.removeAllHighlights();
+            }
         });
         textPane.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(KeyEvent e) { highlighter.removeAllHighlights(); }
-            @Override
-            public void keyPressed(KeyEvent e) { highlighter.removeAllHighlights(); }
+            public void keyTyped(KeyEvent e) {
+                highlighter.removeAllHighlights();
+            }
         });
     }
 
